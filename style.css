@@ -1,0 +1,26 @@
+body {
+  font-family: sans-serif;
+  max-width: 500px;
+  margin: auto;
+  padding: 1rem;
+}
+.chat-box {
+  height: 250px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+button {
+  padding: 0.5rem 1rem;
+}
+footer {
+  font-size: 0.7rem;
+  text-align: center;
+  margin-top: 2rem;
+}
