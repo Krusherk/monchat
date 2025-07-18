@@ -1,85 +1,25 @@
-import { ChatModel } from "./multisynq-model.js";
-import { connectWallet } from "./monad.js";
-import * as Multisynq from "https://cdn.skypack.dev/multisynq";
+import { connectWallet } from './monad.js';
 
-window.onload = () => {
-  const model = new ChatModel();
-  const view = new Multisynq.View(model);
+document.addEventListener('DOMContentLoaded', () => {
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendMessage');
+  const connectBtn = document.getElementById('connectWallet');
 
-  // Attach event listeners safely after DOM loads
-  const textIn = document.getElementById("textIn");
-  const textOut = document.getElementById("textOut");
-  const nicknameBox = document.getElementById("nickname");
-  const viewCountBox = document.getElementById("viewCount");
-  const sendButton = document.getElementById("sendButton");
-  const connectBtn = document.getElementById("connectWallet");
-
-  // Send message
-  view.send = function () {
-    const text = textIn.value;
-    if (!text) return;
-    if (text === "/reset") {
-      this.publish("input", "reset", "user request");
-    } else {
-      this.publish("input", "newPost", { viewId: this.viewId, text });
-    }
-    textIn.value = "";
-  };
-
-  // Display updates
-  view.refreshHistory = function () {
-    textOut.innerHTML = model.history.map((m) => m.html).join("<br>");
-    textOut.scrollTop = textOut.scrollHeight;
-  };
-
-  view.refreshViewInfo = function () {
-    nicknameBox.innerHTML = `<b>Nickname:</b> ${model.views.get(this.viewId)}`;
-    viewCountBox.innerHTML = `<b>Users:</b> ${model.participants}`;
-  };
-
-  // Subscribe to model updates
-  view.subscribe("history", "refresh", view.refreshHistory);
-  view.subscribe("viewInfo", "refresh", view.refreshViewInfo);
-  view.refreshHistory();
-  view.refreshViewInfo();
-
-  // Auto-reset chat if alone
-  if (
-    model.participants === 1 &&
-    !model.history.find((item) => item.viewId === view.viewId)
-  ) {
-    view.publish("input", "reset", "new participant");
-  }
-
-  // UI events
-  sendButton.onclick = () => view.send();
-  textIn.onkeydown = (e) => {
-    if (e.key === "Enter") view.send();
-  };
-  connectBtn.onclick = () => connectWallet();
-};
-import { connectWallet } from "./monad.js";
-
-window.onload = () => {
-  const sendButton = document.getElementById("sendButton");
-  const connectWalletButton = document.getElementById("connectWallet");
-  const textIn = document.getElementById("textIn");
-  const textOut = document.getElementById("textOut");
-
-  // TEMP: display text directly
-  sendButton.onclick = () => {
-    const message = textIn.value.trim();
+  sendBtn.onclick = () => {
+    const message = input.value.trim();
     if (message) {
-      textOut.innerHTML += `<div>${message}</div>`;
-      textIn.value = "";
+      const p = document.createElement('p');
+      p.textContent = message;
+      chat.appendChild(p);
+      chat.scrollTop = chat.scrollHeight;
+      input.value = '';
     }
   };
 
-  connectWalletButton.onclick = () => {
-    connectWallet();
-  };
-
-  textIn.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendButton.click();
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendBtn.click();
   });
-};
+
+  connectBtn.onclick = () => connectWallet();
+});
