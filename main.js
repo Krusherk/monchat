@@ -58,3 +58,28 @@ window.onload = () => {
   };
   connectBtn.onclick = () => connectWallet();
 };
+import { connectWallet } from "./monad.js";
+
+window.onload = () => {
+  const sendButton = document.getElementById("sendButton");
+  const connectWalletButton = document.getElementById("connectWallet");
+  const textIn = document.getElementById("textIn");
+  const textOut = document.getElementById("textOut");
+
+  // TEMP: display text directly
+  sendButton.onclick = () => {
+    const message = textIn.value.trim();
+    if (message) {
+      textOut.innerHTML += `<div>${message}</div>`;
+      textIn.value = "";
+    }
+  };
+
+  connectWalletButton.onclick = () => {
+    connectWallet();
+  };
+
+  textIn.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendButton.click();
+  });
+};
