@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Cracked Devs Chat</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div id="app">
-    <h1>CRACKED DEVS</h1>
-    <div id="nickname"></div>
-    <div id="viewCount"></div>
-    <div id="textOut" class="chat-box"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cracked Devs</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <h1>CRACKED DEVS</h1>
 
-    <input id="textIn" placeholder="Type message or /reset" />
-    <button id="sendButton">Send</button>
+      <div class="chat-box" id="textOut"></div>
 
-    <hr />
-    <h3>Wallet</h3>
-    <div id="walletInfo"></div>
-    <button id="connectWallet">Connect Wallet</button>
+      <input id="textIn" type="text" placeholder="Enter message..." />
+      <button id="sendButton">Send</button>
 
-    <footer>made by crack</footer>
-  </div>
+      <hr />
 
-  <script type="module" src="main.js"></script>
-</body>
+      <h2>Wallet</h2>
+      <button id="connectWallet">Connect Wallet</button>
+      <div id="walletInfo"></div>
+
+      <footer>made by crack</footer>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
 </html>
