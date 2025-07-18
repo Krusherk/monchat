@@ -57,3 +57,17 @@ async function sendMON() {
     alert("Transaction failed: " + err.message);
   }
 }
+export async function connectWallet() {
+  if (typeof window.ethereum === "undefined") {
+    alert("MetaMask not found");
+    return;
+  }
+
+  try {
+    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+    const address = accounts[0];
+    document.getElementById("walletInfo").innerText = "Connected: " + address;
+  } catch (err) {
+    alert("Connection failed");
+  }
+}
