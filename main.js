@@ -2,39 +2,59 @@ import { ChatModel } from "./multisynq-model.js";
 import { connectWallet } from "./monad.js";
 import * as Multisynq from "https://cdn.skypack.dev/multisynq";
 
-const model = new ChatModel();
-const view = new Multisynq.View(model);
+window.onload = () => {
+  const model = new ChatModel();
+  const view = new Multisynq.View(model);
 
-view.send = function () {
-  const text = document.getElementById("textIn").value;
-  if (!text) return;
-  if (text === "/reset") {
-    this.publish("input", "reset", "user request");
-  } else {
-    this.publish("input", "newPost", { viewId: this.viewId, text });
+  // Attach event listeners safely after DOM loads
+  const textIn = document.getElementById("textIn");
+  const textOut = document.getElementById("textOut");
+  const nicknameBox = document.getElementById("nickname");
+  const viewCountBox = document.getElementById("viewCount");
+  const sendButton = document.getElementById("sendButton");
+  const connectBtn = document.getElementById("connectWallet");
+
+  // Send message
+  view.send = function () {
+    const text = textIn.value;
+    if (!text) return;
+    if (text === "/reset") {
+      this.publish("input", "reset", "user request");
+    } else {
+      this.publish("input", "newPost", { viewId: this.viewId, text });
+    }
+    textIn.value = "";
+  };
+
+  // Display updates
+  view.refreshHistory = function () {
+    textOut.innerHTML = model.history.map((m) => m.html).join("<br>");
+    textOut.scrollTop = textOut.scrollHeight;
+  };
+
+  view.refreshViewInfo = function () {
+    nicknameBox.innerHTML = `<b>Nickname:</b> ${model.views.get(this.viewId)}`;
+    viewCountBox.innerHTML = `<b>Users:</b> ${model.participants}`;
+  };
+
+  // Subscribe to model updates
+  view.subscribe("history", "refresh", view.refreshHistory);
+  view.subscribe("viewInfo", "refresh", view.refreshViewInfo);
+  view.refreshHistory();
+  view.refreshViewInfo();
+
+  // Auto-reset chat if alone
+  if (
+    model.participants === 1 &&
+    !model.history.find((item) => item.viewId === view.viewId)
+  ) {
+    view.publish("input", "reset", "new participant");
   }
-  document.getElementById("textIn").value = "";
-};
 
-view.refreshHistory = function () {
-  document.getElementById("textOut").innerHTML =
-    model.history.map((msg) => msg.html).join("<br>");
+  // UI events
+  sendButton.onclick = () => view.send();
+  textIn.onkeydown = (e) => {
+    if (e.key === "Enter") view.send();
+  };
+  connectBtn.onclick = () => connectWallet();
 };
-
-view.refreshViewInfo = function () {
-  document.getElementById("nickname").innerHTML =
-    "<b>Nickname:</b> " + model.views.get(this.viewId);
-  document.getElementById("viewCount").innerHTML =
-    "<b>Users:</b> " + model.participants;
-};
-
-view.subscribe("history", "refresh", view.refreshHistory);
-view.subscribe("viewInfo", "refresh", view.refreshViewInfo);
-view.refreshHistory();
-view.refreshViewInfo();
-
-document.getElementById("sendButton").onclick = () => view.send();
-document.getElementById("textIn").onkeydown = (e) => {
-  if (e.key === "Enter") view.send();
-};
-document.getElementById("connectWallet").onclick = connectWallet;
