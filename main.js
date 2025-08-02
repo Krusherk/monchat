@@ -1,23 +1,15 @@
 import { connectWallet } from './monad.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  const socket = io('https://YOUR_BACKEND_URL'); // Replace with your backend URL
   const chat = document.getElementById('chat');
   const input = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendMessage');
   const connectBtn = document.getElementById('connectWallet');
   const typingStatus = document.getElementById('typingStatus');
+  const walletInfo = document.getElementById('walletInfo');
 
-  let username = '';
-  const users = []; // optional in-memory storage
-  let typingTimeout;
-
-  const askUsername = () => {
-    const name = prompt("Choose your username:");
-    username = name?.trim() || "Anonymous";
-    if (!users.includes(username)) {
-      users.push(username);
-    }
-  };
+  let username = prompt("Enter your username:")?.trim() || "Anonymous";
 
   const createMessage = (sender, text) => {
     const container = document.createElement('div');
@@ -37,28 +29,33 @@ document.addEventListener('DOMContentLoaded', () => {
     chat.scrollTop = chat.scrollHeight;
   };
 
-  const handleTyping = () => {
-    typingStatus.textContent = `${username} is typing...`;
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      typingStatus.textContent = '';
-    }, 1000);
-  };
+  input.addEventListener('input', () => {
+    socket.emit('typing', username);
+  });
 
-  sendBtn.onclick = () => {
-    const text = input.value.trim();
-    if (!text) return;
-    createMessage(username, text);
-    input.value = '';
-    typingStatus.textContent = '';
-  };
-
-  input.addEventListener('input', handleTyping);
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendBtn.click();
   });
 
-  connectBtn.onclick = () => connectWallet();
-  askUsername();
-});
+  sendBtn.onclick = () => {
+    const text = input.value.trim();
+    if (!text) return;
+    socket.emit('message', { username, text });
+    input.value = '';
+    typingStatus.textContent = '';
+  };
 
+  socket.on('message', ({ username, text }) => {
+    createMessage(username, text);
+  });
+
+  socket.on('typing', (user) => {
+    typingStatus.textContent = `${user} is typing...`;
+    clearTimeout(window.typingTimeout);
+    window.typingTimeout = setTimeout(() => {
+      typingStatus.textContent = '';
+    }, 1500);
+  });
+
+  connectBtn.onclick = () => connectWallet(walletInfo);
+});
