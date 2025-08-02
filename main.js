@@ -6,13 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const sendBtn = document.getElementById('sendMessage');
   const connectBtn = document.getElementById('connectWallet');
 
+  const createMessageBubble = (text) => {
+    const p = document.createElement('p');
+    p.textContent = text;
+    chat.appendChild(p);
+    chat.scrollTop = chat.scrollHeight;
+  };
+
   sendBtn.onclick = () => {
     const message = input.value.trim();
     if (message) {
-      const p = document.createElement('p');
-      p.textContent = message;
-      chat.appendChild(p);
-      chat.scrollTop = chat.scrollHeight;
+      createMessageBubble(message);
       input.value = '';
     }
   };
