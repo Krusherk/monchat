@@ -1,17 +1,13 @@
-import { Multisynq } from 'multisynq';
+import { createClient } from 'https://cdn.skypack.dev/@multisynq/client';
 
-const API_KEY = '2ndohxjGirkf4wcTbvKV1GzdwPsCqKVmtg1YqBNsK';
-
-export function setupMultisynq(onReceive, onTyping) {
-  const sync = new Multisynq(API_KEY);
-
-  sync.onMessage(data => {
-    if (onReceive) onReceive(data);
+export function setupMultisynq(onMessage, onTyping) {
+  const multisynq = createClient({
+    apiKey: '2ndohxjGirkf4wcTbvKV1GzdwPsCqKVmtg1YqBNsK',
+    room: 'cracked-devs-room',
   });
 
-  sync.onTyping(user => {
-    if (onTyping) onTyping(user);
-  });
+  multisynq.on('message', onMessage);
+  multisynq.on('typing', onTyping);
 
-  window.multisynq = sync;
+  window.multisynq = multisynq;
 }
