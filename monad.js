@@ -1,4 +1,4 @@
-export async function connectWallet(walletDisplayEl) {
+export async function connectWallet() {
   if (!window.ethereum) {
     alert("Please install MetaMask to connect your wallet.");
     return;
@@ -9,8 +9,8 @@ export async function connectWallet(walletDisplayEl) {
       method: "eth_requestAccounts"
     });
 
-    if (walletDisplayEl)
-      walletDisplayEl.textContent = "Connected: " + account.slice(0, 6) + "..." + account.slice(-4);
+    document.getElementById("walletInfo").textContent =
+      "Connected: " + account.slice(0, 6) + "..." + account.slice(-4);
   } catch (error) {
     console.error("Wallet connection failed:", error);
     alert("Connection failed.");

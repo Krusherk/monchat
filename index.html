@@ -36,6 +36,32 @@
       margin-bottom: 1rem;
     }
 
+    #usernameSetup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    #usernameInput {
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: rgba(255, 255, 255, 0.03);
+      color: white;
+      outline: none;
+      margin-bottom: 1rem;
+      width: 250px;
+      text-align: center;
+    }
+
+    #chatSection {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
     #chat {
       width: 100%;
       max-width: 600px;
@@ -48,7 +74,6 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 0 20px rgba(0, 170, 255, 0.1);
       margin-bottom: 1rem;
-      transition: all 0.3s ease-in-out;
       animation: fadeInUp 1.2s ease;
     }
 
@@ -159,17 +184,22 @@
   <button id="connectWallet">Connect Wallet</button>
   <h1>CRACK DEVS</h1>
 
-  <div id="chat"></div>
-  <div id="typingStatus"></div>
-
-  <div class="inputRow">
-    <input type="text" id="messageInput" placeholder="Type your message..." />
-    <button id="sendMessage">Send</button>
+  <div id="usernameSetup">
+    <input type="text" id="usernameInput" placeholder="Enter your name" />
+    <button id="setUsername">Start Chatting</button>
   </div>
 
-  <div id="walletInfo"></div>
-  <footer>made by crack</footer>
+  <div id="chatSection">
+    <div id="chat"></div>
+    <div id="typingStatus"></div>
+    <div class="inputRow">
+      <input type="text" id="messageInput" placeholder="Type your message..." />
+      <button id="sendMessage">Send</button>
+    </div>
+    <div id="walletInfo"></div>
+  </div>
 
+  <footer>made by crack</footer>
   <script type="module" src="main.js" defer></script>
 </body>
 </html>
