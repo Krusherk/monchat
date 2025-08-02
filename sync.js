@@ -1,31 +1,17 @@
-const API_KEY = "2ndohxjGirkf4wcTbvKV1GzdwPsCqKVmtg1YqBNsK";
-let ws;
+import Multisynq from 'https://cdn.multisynq.chat/sdk/v1.js';
 
-export function initMultisynq(callback) {
-  ws = new WebSocket(`wss://europe.multisynq.live/socket?api_key=${API_KEY}`);
+export function setupMultisynq(onMsg, onTyping) {
+  const apiKey = '2ndohxjGirkf4wcTbvKV1GzdwPsCqKVmtg1YqBNsK';
 
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    callback(data);
-  };
+  const multisynq = new Multisynq(apiKey, { room: 'monchat' });
 
-  ws.onopen = () => {
-    console.log("🔌 Connected to Multisynq");
-  };
+  multisynq.onMessage((msg) => {
+    onMsg(msg);
+  });
 
-  ws.onerror = (err) => {
-    console.error("Multisynq error:", err);
-  };
-}
+  multisynq.onTyping((user) => {
+    onTyping(user);
+  });
 
-export function sendMessage(payload) {
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'msg', ...payload }));
-  }
-}
-
-export function broadcastTyping(name) {
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'typing', name }));
-  }
+  window.multisynq = multisynq;
 }

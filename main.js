@@ -1,59 +1,67 @@
 import { connectWallet } from './monad.js';
-import { initMultisynq, sendMessage, listenForMessages, broadcastTyping } from './sync.js';
+import { setupMultisynq } from './sync.js';
 
 let username = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const chat = document.getElementById('chat');
-  const input = document.getElementById('messageInput');
-  const sendBtn = document.getElementById('sendMessage');
   const connectBtn = document.getElementById('connectWallet');
-  const typingIndicator = document.getElementById('typingIndicator');
+  const sendBtn = document.getElementById('sendMessage');
+  const input = document.getElementById('messageInput');
+  const chat = document.getElementById('chat');
+  const typingStatus = document.getElementById('typingStatus');
+  const saveUsernameBtn = document.getElementById('saveUsername');
 
-  connectBtn.onclick = () => connectWallet();
+  // Username selection modal
+  document.getElementById('usernameModal').style.display = 'flex';
 
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendBtn.click();
-    else broadcastTyping(username);
-  });
+  saveUsernameBtn.onclick = () => {
+    const inputEl = document.getElementById('usernameInput');
+    username = inputEl.value.trim();
+    if (username) {
+      document.getElementById('usernameModal').style.display = 'none';
+      setupMultisynq(onReceiveMessage, onTyping);
+    }
+  };
+
+  connectBtn.onclick = connectWallet;
 
   sendBtn.onclick = () => {
-    const message = input.value.trim();
-    if (message) {
-      appendMessage(username, message, true);
-      sendMessage({ name: username, text: message });
+    const msg = input.value.trim();
+    if (msg && username) {
+      sendMessageToMultisynq(username, msg);
       input.value = '';
     }
   };
 
-  function appendMessage(name, text, isSelf = false) {
-    const p = document.createElement('div');
-    p.className = 'message' + (isSelf ? ' self' : '');
-    p.textContent = `${name}: ${text}`;
-    chat.appendChild(p);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendBtn.click();
+    else emitTyping(username);
+  });
+
+  function onReceiveMessage(data) {
+    const { user, text } = data;
+    const container = document.createElement('div');
+    container.className = 'message-container';
+    container.innerHTML = `<div class="username">${user}</div><div class="bubble">${text}</div>`;
+    chat.appendChild(container);
     chat.scrollTop = chat.scrollHeight;
   }
 
-  document.getElementById('confirmName').onclick = () => {
-    const entered = document.getElementById('usernameInput').value.trim();
-    username = entered || getRandomName();
-    document.getElementById('nameModal').style.display = 'none';
-    initMultisynq((data) => {
-      if (data.type === 'msg') {
-        appendMessage(data.name, data.text);
-      }
-      if (data.type === 'typing' && data.name !== username) {
-        typingIndicator.style.display = 'block';
-        clearTimeout(typingIndicator._hideTimer);
-        typingIndicator._hideTimer = setTimeout(() => {
-          typingIndicator.style.display = 'none';
-        }, 1000);
-      }
-    });
-  };
+  function onTyping(user) {
+    typingStatus.innerHTML = `${user} is typing...`;
+    setTimeout(() => (typingStatus.innerHTML = ''), 2000);
+  }
 });
 
-function getRandomName() {
-  const names = ['Jack', 'Annie', 'Mona', 'Leo', 'Ray', 'Suki', 'Kai', 'Lara'];
-  return names[Math.floor(Math.random() * names.length)];
-}
+// global so sync.js can access
+window.sendMessageToMultisynq = (user, text) => {
+  if (window.multisynq) {
+    window.multisynq.send({ user, text });
+  }
+};
+
+window.emitTyping = (user) => {
+  if (window.multisynq) {
+    window.multisynq.typing(user);
+  }
+};
