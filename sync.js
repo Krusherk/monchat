@@ -1,17 +1,17 @@
-import Multisynq from 'https://cdn.multisynq.chat/sdk/v1.js';
+import { Multisynq } from 'multisynq';
 
-export function setupMultisynq(onMsg, onTyping) {
-  const apiKey = '2ndohxjGirkf4wcTbvKV1GzdwPsCqKVmtg1YqBNsK';
+const API_KEY = '2ndohxjGirkf4wcTbvKV1GzdwPsCqKVmtg1YqBNsK';
 
-  const multisynq = new Multisynq(apiKey, { room: 'monchat' });
+export function setupMultisynq(onReceive, onTyping) {
+  const sync = new Multisynq(API_KEY);
 
-  multisynq.onMessage((msg) => {
-    onMsg(msg);
+  sync.onMessage(data => {
+    if (onReceive) onReceive(data);
   });
 
-  multisynq.onTyping((user) => {
-    onTyping(user);
+  sync.onTyping(user => {
+    if (onTyping) onTyping(user);
   });
 
-  window.multisynq = multisynq;
+  window.multisynq = sync;
 }

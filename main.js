@@ -11,16 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const typingStatus = document.getElementById('typingStatus');
   const saveUsernameBtn = document.getElementById('saveUsername');
 
-  // Username selection modal
   document.getElementById('usernameModal').style.display = 'flex';
 
   saveUsernameBtn.onclick = () => {
     const inputEl = document.getElementById('usernameInput');
-    username = inputEl.value.trim();
-    if (username) {
-      document.getElementById('usernameModal').style.display = 'none';
-      setupMultisynq(onReceiveMessage, onTyping);
-    }
+    username = inputEl.value.trim() || `User${Math.floor(Math.random() * 1000)}`;
+    document.getElementById('usernameModal').style.display = 'none';
+    setupMultisynq(onReceiveMessage, onTyping);
   };
 
   connectBtn.onclick = connectWallet;
@@ -53,15 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// global so sync.js can access
 window.sendMessageToMultisynq = (user, text) => {
-  if (window.multisynq) {
-    window.multisynq.send({ user, text });
-  }
+  if (window.multisynq) window.multisynq.send({ user, text });
 };
 
 window.emitTyping = (user) => {
-  if (window.multisynq) {
-    window.multisynq.typing(user);
-  }
+  if (window.multisynq) window.multisynq.typing(user);
 };
