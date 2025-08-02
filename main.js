@@ -5,52 +5,60 @@ document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendMessage');
   const connectBtn = document.getElementById('connectWallet');
+  const typingStatus = document.getElementById('typingStatus');
 
   let username = '';
+  const users = []; // optional in-memory storage
+  let typingTimeout;
 
   const askUsername = () => {
-    const name = prompt("Pick a username:");
-    if (name && name.trim() !== '') {
-      username = name.trim();
-    } else {
-      username = 'Anonymous';
+    const name = prompt("Choose your username:");
+    username = name?.trim() || "Anonymous";
+    if (!users.includes(username)) {
+      users.push(username);
     }
   };
 
-  const createMessageBubble = (text, sender) => {
+  const createMessage = (sender, text) => {
     const container = document.createElement('div');
-    container.style.marginBottom = '1rem';
+    container.className = 'message-container';
 
-    const nameTag = document.createElement('div');
-    nameTag.textContent = sender;
-    nameTag.style.fontWeight = '600';
-    nameTag.style.marginBottom = '0.2rem';
-    nameTag.style.color = '#00aaff';
-    nameTag.style.fontSize = '0.85rem';
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'username';
+    nameDiv.textContent = sender;
 
-    const bubble = document.createElement('p');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
     bubble.textContent = text;
 
-    container.appendChild(nameTag);
+    container.appendChild(nameDiv);
     container.appendChild(bubble);
     chat.appendChild(container);
     chat.scrollTop = chat.scrollHeight;
   };
 
-  sendBtn.onclick = () => {
-    const message = input.value.trim();
-    if (message) {
-      createMessageBubble(message, username);
-      input.value = '';
-    }
+  const handleTyping = () => {
+    typingStatus.textContent = `${username} is typing...`;
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      typingStatus.textContent = '';
+    }, 1000);
   };
 
+  sendBtn.onclick = () => {
+    const text = input.value.trim();
+    if (!text) return;
+    createMessage(username, text);
+    input.value = '';
+    typingStatus.textContent = '';
+  };
+
+  input.addEventListener('input', handleTyping);
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendBtn.click();
   });
 
   connectBtn.onclick = () => connectWallet();
-
-  // Ask for username on load
   askUsername();
 });
+
