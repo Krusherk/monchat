@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cracked Devs</title>
+  <title>CRACKED DEVS</title>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #0a0a0a;
-      color: #fff;
+      color: #f1f1f1;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
+
     header {
       display: flex;
       justify-content: space-between;
@@ -21,10 +22,11 @@
       background: #000;
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
     }
+
     header h1 {
       color: cyan;
-      margin: 0;
     }
+
     #connectWallet {
       background: #0077ff;
       border: none;
@@ -33,6 +35,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     main {
       flex: 1;
       display: flex;
@@ -40,37 +43,50 @@
       justify-content: flex-end;
       padding: 1rem;
     }
+
+    #chatContainer {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
     #chat {
       flex: 1;
       overflow-y: auto;
-      padding-bottom: 1rem;
+      padding: 1rem;
     }
-    .message {
+
+    .message-container {
       margin-bottom: 1rem;
-      animation: fadeIn 0.2s ease-in-out;
     }
+
     .username {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: #888;
     }
+
     .bubble {
       background: #222;
       padding: 0.8rem;
       border-radius: 12px;
-      max-width: 70%;
+      max-width: 60%;
       margin-top: 0.2rem;
-      animation: slideUp 0.3s ease-out;
     }
+
     #inputRow {
       display: flex;
       gap: 0.5rem;
+      margin-top: auto;
+      padding-top: 0.5rem;
     }
+
     #messageInput {
       flex: 1;
       padding: 0.8rem;
       border-radius: 10px;
       border: none;
     }
+
     #sendMessage {
       background: #00aaff;
       color: white;
@@ -79,25 +95,19 @@
       border-radius: 10px;
       cursor: pointer;
     }
+
     #typingStatus {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: #888;
-      margin: 0.5rem 0;
+      margin: 0.5rem;
     }
+
     footer {
       text-align: center;
       padding: 0.5rem;
       background: #111;
       font-size: 0.8rem;
       color: #444;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
     }
   </style>
 </head>
@@ -108,71 +118,84 @@
   </header>
 
   <main>
-    <div id="chat"></div>
-    <div id="typingStatus"></div>
-    <div id="inputRow">
-      <input id="messageInput" placeholder="Type a message..." autocomplete="off" />
-      <button id="sendMessage">Send</button>
+    <div id="chatContainer">
+      <div id="chat"></div>
+      <div id="typingStatus"></div>
+      <div id="inputRow">
+        <input id="messageInput" placeholder="Type a message..." />
+        <button id="sendMessage">Send</button>
+      </div>
     </div>
   </main>
 
   <footer>Made by Crack</footer>
 
   <script type="module">
-    import * as Multisynq from "https://cdn.multisynq.com/client/v1.js";
+    import { setupMultisynq } from './sync.js';
 
-    const username = randomName();
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('messageInput');
+    const connectBtn = document.getElementById('connectWallet');
     const sendBtn = document.getElementById('sendMessage');
+    const input = document.getElementById('messageInput');
+    const chat = document.getElementById('chat');
     const typingStatus = document.getElementById('typingStatus');
-    const walletBtn = document.getElementById('connectWallet');
 
-    const multisynq = new Multisynq.Client("2ndohxjGirkf4wcTbvKV1GzdwPsCqKVmtg1YqBNsK");
-    multisynq.join("cracked-devs-room");
+    // Generate a random username
+    const names = ["Mona", "Annie", "Crack", "Devs", "Ash", "Sky"];
+    const username = names[Math.floor(Math.random() * names.length)];
 
-    multisynq.on('message', data => {
-      const container = document.createElement('div');
-      container.className = 'message';
-      container.innerHTML = `<div class="username">${data.user}</div><div class="bubble">${data.text}</div>`;
-      chat.appendChild(container);
-      chat.scrollTop = chat.scrollHeight;
-    });
-
-    multisynq.on('typing', user => {
-      typingStatus.innerText = `${user} is typing...`;
-      clearTimeout(window._typingTimeout);
-      window._typingTimeout = setTimeout(() => typingStatus.innerText = '', 1500);
-    });
+    // Initialize Multisynq
+    setupMultisynq(onReceiveMessage, onTyping);
 
     sendBtn.onclick = () => {
-      const text = input.value.trim();
-      if (text) {
-        multisynq.send({ user: username, text });
+      const msg = input.value.trim();
+      if (msg) {
+        sendMessageToMultisynq(username, msg);
         input.value = '';
       }
     };
 
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') sendBtn.click();
-      else multisynq.typing(username);
+      else emitTyping(username);
     });
 
-    walletBtn.onclick = async () => {
-      if (!window.ethereum) return alert("Please install MetaMask or any EVM wallet.");
-      try {
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        alert(`Wallet connected: ${accounts[0]}`);
-      } catch (err) {
-        console.error(err);
-        alert("Wallet connection failed.");
+    connectBtn.onclick = async () => {
+      if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        alert("Wallet connected!");
+      } else {
+        alert("MetaMask not found.");
       }
     };
 
-    function randomName() {
-      const names = ["Mona", "Crack", "Neo", "Luna", "Jack", "Zuri", "Nova", "Ash"];
-      return names[Math.floor(Math.random() * names.length)];
+    function onReceiveMessage(data) {
+      const { user, text } = data;
+      const container = document.createElement('div');
+      container.className = 'message-container';
+      container.innerHTML = `
+        <div class="username">${user}</div>
+        <div class="bubble">${text}</div>`;
+      chat.appendChild(container);
+      chat.scrollTop = chat.scrollHeight;
     }
+
+    function onTyping(user) {
+      typingStatus.textContent = `${user} is typing...`;
+      setTimeout(() => (typingStatus.textContent = ''), 2000);
+    }
+
+    // Global functions so sync.js can call them
+    window.sendMessageToMultisynq = (user, text) => {
+      if (window.multisynq) {
+        window.multisynq.send({ user, text });
+      }
+    };
+
+    window.emitTyping = (user) => {
+      if (window.multisynq) {
+        window.multisynq.typing(user);
+      }
+    };
   </script>
 </body>
 </html>
